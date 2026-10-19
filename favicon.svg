@@ -1,18 +1,18 @@
-<!-- 站点图标：日记系列双环 mark，与页头一致；取自页面主题色，无外部依赖 -->
+<!-- 站点图标：lucide notebook-pen（ISC 许可，https://lucide.dev/license），与页头图标同源；
+     路径照抄官方 SVG，主题色沿用页面蓝，浅深色两态内嵌切换 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <style>
     .bg { fill: #F4F6F8; }
-    .ring-cal { stroke: #3482FF; }
-    .ring-exp { stroke: #4A672D; }
+    .ink { stroke: #3482FF; }
     @media (prefers-color-scheme: dark) {
       .bg { fill: #101317; }
-      .ring-cal { stroke: #78ADFF; }
-      .ring-exp { stroke: #A6C377; }
+      .ink { stroke: #78ADFF; }
     }
   </style>
   <rect class="bg" width="64" height="64" rx="14"/>
-  <g fill="none" stroke-width="5.5" stroke-linecap="round">
-    <circle class="ring-cal" cx="26" cy="32" r="13" stroke-dasharray="57 24" transform="rotate(-90 26 32)"/>
-    <circle class="ring-exp" cx="38" cy="32" r="13" stroke-dasharray="36 45" transform="rotate(-90 38 32)"/>
+  <g class="ink" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="translate(9 9) scale(2)">
+    <path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/>
+    <path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/>
+    <path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/>
   </g>
 </svg>
