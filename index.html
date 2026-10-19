@@ -7,11 +7,11 @@
 <meta name="description" content="日记系列：热量日记（饮食与体重记录）与开支日记（极简记账）两款 Android 应用的官方下载入口。">
 <meta name="color-scheme" content="light dark">
 <!--
-  图标取自开源图标库 lucide（ISC 许可）的官方 SVG，内联改写；
+  图标取自开源图标库 lucide（ISC 许可，https://lucide.dev/license）的官方 SVG，内联改写；
   本页无任何外部运行时依赖（无 CDN 脚本 / 外部字体 / 外部图片）。
 -->
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="theme-color" content="#F4F6F8" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#101317" media="(prefers-color-scheme: dark)">
 <style>
@@ -126,12 +126,17 @@
     transition: background-color .2s cubic-bezier(.2, 0, 0, 1), color .2s cubic-bezier(.2, 0, 0, 1);
   }
   .chan .ico { width: 15px; height: 15px; }
-  .chan[aria-selected="true"] {
+  .chan[aria-checked="true"] {
     background: var(--surface); color: var(--ink);
     box-shadow: 0 1px 2px rgba(16, 20, 28, .1);
   }
-  .chan:disabled { opacity: .45; cursor: default; }
+  .chan[aria-disabled="true"] { opacity: .45; cursor: default; }
   .chan:focus-visible { outline: 2px solid var(--cal-ring); outline-offset: 2px; }
+  /* 仅供读屏的通道禁用说明，绝不参与布局 */
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
 
   /* 信息行 / 提示行：单行高恒定 + 垂直居中，行内内容切换时行高不塌 */
   .dl-row { min-height: 26px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
@@ -148,7 +153,7 @@
   details.log summary {
     cursor: pointer; color: var(--muted); font-size: 13px; list-style: none;
     display: inline-flex; align-items: center; gap: 3px;
-    padding: 7px 0; margin: -7px 0; /* 视觉行高不变，触控高度补到 40px */
+    padding: 12px 0; margin: -12px 0; /* 视觉行高不变，触控高度补到 ≥40px */
   }
   details.log summary::-webkit-details-marker { display: none; }
   details.log summary .chev { transition: transform .25s cubic-bezier(.2, 0, 0, 1); }
@@ -291,13 +296,15 @@
           <li><svg class="ico"><use href="#i-check"/></svg>邮箱注册登录，记录自动云同步，换手机不丢</li>
         </ul>
         <div class="dl">
-          <div class="chans" role="tablist" aria-label="下载通道">
-            <button class="chan" type="button" role="tab" data-chan="stable" aria-selected="true">
+          <div class="chans" role="radiogroup" aria-label="下载通道">
+            <button class="chan" type="button" role="radio" data-chan="stable" aria-checked="true" tabindex="0" aria-describedby="cal-stable-why">
               <svg class="ico"><use href="#i-check"/></svg>正式版
             </button>
-            <button class="chan" type="button" role="tab" data-chan="beta" aria-selected="false">
+            <button class="chan" type="button" role="radio" data-chan="beta" aria-checked="false" tabindex="-1" aria-describedby="cal-beta-why">
               <svg class="ico"><use href="#i-flask"/></svg>公测版
             </button>
+            <span class="sr-only" id="cal-stable-why" hidden></span>
+            <span class="sr-only" id="cal-beta-why" hidden></span>
           </div>
           <div class="dl-row"><p class="dl-note" hidden></p></div>
           <div class="dl-row dl-meta">
@@ -336,13 +343,15 @@
           <li><svg class="ico"><use href="#i-check"/></svg>数据默认存本机，登录后可云同步，随时 JSON 备份导出</li>
         </ul>
         <div class="dl">
-          <div class="chans" role="tablist" aria-label="下载通道">
-            <button class="chan" type="button" role="tab" data-chan="stable" aria-selected="true">
+          <div class="chans" role="radiogroup" aria-label="下载通道">
+            <button class="chan" type="button" role="radio" data-chan="stable" aria-checked="true" tabindex="0" aria-describedby="exp-stable-why">
               <svg class="ico"><use href="#i-check"/></svg>正式版
             </button>
-            <button class="chan" type="button" role="tab" data-chan="beta" aria-selected="false">
+            <button class="chan" type="button" role="radio" data-chan="beta" aria-checked="false" tabindex="-1" aria-describedby="exp-beta-why">
               <svg class="ico"><use href="#i-flask"/></svg>公测版
             </button>
+            <span class="sr-only" id="exp-stable-why" hidden></span>
+            <span class="sr-only" id="exp-beta-why" hidden></span>
           </div>
           <div class="dl-row"><p class="dl-note" hidden></p></div>
           <div class="dl-row dl-meta">
@@ -392,29 +401,37 @@
         body: JSON.stringify({ path: path })
       })
         .then(function (r) { return r.json(); })
-        .then(function (j) { return (j && j.code === 200 && j.data && j.data.raw_url) || null; })
-        .catch(function () { return null; });
+        .then(function (j) {
+          if (j && j.code === 200 && j.data && j.data.raw_url) return { raw: j.data.raw_url };
+          // fs/get 对不存在的路径明确回 "object not found"，这才算「未发布」；
+          // 网络失败/超时/非 200 一律是获取失败，不能冒充未发布
+          if (j && /object not found/.test(j.message || '')) return { missing: true };
+          return { error: true };
+        })
+        .catch(function () { return { error: true }; });
     }
 
     function loadChannel(dir, ch) {
-      return fetchRaw('/' + dir + '/' + ch + '/version.json').then(function (raw) {
-        if (!raw) return { status: 'empty' };
-        return fetchWithTimeout(raw)
+      return fetchRaw('/' + dir + '/' + ch + '/version.json').then(function (res) {
+        if (res.error) return { status: 'error' };
+        if (res.missing) return { status: 'empty' };
+        return fetchWithTimeout(res.raw)
           .then(function (r) { return r.ok ? r.json() : null; })
           .catch(function () { return null; })
           .then(function (meta) {
             if (!meta || !meta.version_name || !meta.download_url) return { status: 'error' };
+            if (/-alpha\./.test(meta.version_name)) return { status: 'error' }; // alpha 不外露，CI 误投放时页面不背锅
             var apkPath = null;
             try { apkPath = new URL(meta.download_url, STORAGE).pathname; } catch (e) {}
             if (!apkPath) return { status: 'error' };
-            return fetchRaw(apkPath).then(function (apkRaw) {
-              if (!apkRaw) return { status: 'error' };
+            return fetchRaw(apkPath).then(function (apkRes) {
+              if (!apkRes.raw) return { status: 'error' };
               return {
                 status: 'ready',
                 version: meta.version_name,
                 updated: meta.updated_at || '',
                 log: meta.changelog || '',
-                href: apkRaw
+                href: apkRes.raw
               };
             });
           });
@@ -449,8 +466,13 @@
       var btn = card.querySelector('.btn');
       var btnLabel = card.querySelector('.btn-label');
       var hint = card.querySelector('.dl-hint');
+      var why = {
+        stable: card.querySelector('[id$="-stable-why"]'),
+        beta: card.querySelector('[id$="-beta-why"]')
+      };
       var st = { stable: { status: 'loading' }, beta: { status: 'loading' } };
       var sel = 'stable';
+      var userPicked = false; // 用户手动选过通道后，探测完成不再覆盖选择
 
       // 收起更新行：先播完收起动画再关 open，切通道时立即复位
       function collapseLog(immediate) {
@@ -473,11 +495,27 @@
         }
       });
 
+      // Esc 与点外部收起浮层
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && logEl.classList.contains('is-open')) collapseLog(false);
+      });
+      document.addEventListener('click', function (e) {
+        if (logEl.classList.contains('is-open') && !logEl.contains(e.target)) collapseLog(false);
+      });
+
+      function pick(ch) {
+        if (ch === sel) return;
+        sel = ch;
+        userPicked = true;
+        render();
+      }
+
       function render() {
         var s = st[sel];
         var c = CH[sel];
         ORDER.forEach(function (ch) {
-          tabs[ch].setAttribute('aria-selected', String(ch === sel));
+          tabs[ch].setAttribute('aria-checked', String(ch === sel));
+          tabs[ch].tabIndex = ch === sel ? 0 : -1; // roving tabindex：tab 行只有一个焦点停靠点
         });
         note.hidden = true;
         verEl.hidden = true;
@@ -500,7 +538,7 @@
           var date = fmtDate(s.updated);
           updText.textContent = date;
           updEl.hidden = !date;
-          if (s.log) {
+          if (typeof s.log === 'string' && s.log) {
             logBody.textContent = '';
             s.log.split('\n').map(function (l) { return l.trim(); }).filter(Boolean).slice(0, 8).forEach(function (l) {
               var line = document.createElement('div');
@@ -528,21 +566,40 @@
         ORDER.forEach(function (ch) {
           if (st[ch].status === 'ready' && firstReady === null) firstReady = ch;
         });
-        // 默认选中第一个有版本的通道；两个都没有则停在 stable 的空态
-        sel = firstReady || 'stable';
+        // 用户手动选过且选中的通道有版本 → 尊重选择；否则默认选中第一个有版本的通道
+        if (!(userPicked && st[sel].status === 'ready')) sel = firstReady || 'stable';
         ORDER.forEach(function (ch) {
-          var off = st[ch].status !== 'ready';
-          tabs[ch].disabled = off;
-          tabs[ch].title = off ? (st[ch].status === 'error' ? CH[ch].error : CH[ch].empty) : '';
+          var s = st[ch];
+          var off = s.status !== 'ready';
+          // aria-disabled 保留可聚焦可发现；说明经 aria-describedby 播报
+          tabs[ch].setAttribute('aria-disabled', String(off));
+          why[ch].textContent = off ? (s.status === 'error' ? CH[ch].error : CH[ch].empty) : '';
+          why[ch].hidden = !off;
         });
         render();
       }
 
       ORDER.forEach(function (ch) {
         tabs[ch].addEventListener('click', function () {
-          if (tabs[ch].disabled || ch === sel) return;
-          sel = ch;
-          render();
+          if (tabs[ch].getAttribute('aria-disabled') === 'true') return;
+          pick(ch);
+        });
+        // radio pattern：左右（上下）方向键在可选项间移动并选中
+        tabs[ch].addEventListener('keydown', function (e) {
+          var dir = 0;
+          if (e.key === 'ArrowRight' || e.key === 'ArrowDown') dir = 1;
+          else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') dir = -1;
+          else return;
+          e.preventDefault();
+          var i = ORDER.indexOf(ch);
+          for (var step = 1; step <= ORDER.length; step++) {
+            var next = ORDER[(i + dir * step + ORDER.length * 2) % ORDER.length];
+            if (tabs[next].getAttribute('aria-disabled') !== 'true') {
+              pick(next);
+              tabs[next].focus();
+              return;
+            }
+          }
         });
       });
 
