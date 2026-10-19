@@ -1,0 +1,18 @@
+<!-- 站点图标：日记系列双环 mark，与页头一致；取自页面主题色，无外部依赖 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    .bg { fill: #F4F6F8; }
+    .ring-cal { stroke: #3482FF; }
+    .ring-exp { stroke: #4A672D; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #101317; }
+      .ring-cal { stroke: #78ADFF; }
+      .ring-exp { stroke: #A6C377; }
+    }
+  </style>
+  <rect class="bg" width="64" height="64" rx="14"/>
+  <g fill="none" stroke-width="5.5" stroke-linecap="round" transform="rotate(-90 32 32)">
+    <circle class="ring-cal" cx="26" cy="32" r="13" stroke-dasharray="57 24"/>
+    <circle class="ring-exp" cx="38" cy="32" r="13" stroke-dasharray="36 45"/>
+  </g>
+</svg>
