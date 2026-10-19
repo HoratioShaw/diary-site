@@ -176,10 +176,21 @@
   }
   .log-body {
     margin: 6px; padding: 6px 8px; max-height: 148px; overflow: auto;
-    background: var(--track); border-radius: 7px;
+    background-color: var(--track); border-radius: 7px;
     font-size: 12.5px; line-height: 1.6; color: var(--muted);
-    display: grid; gap: 2px;
+    display: grid; gap: 2px; align-content: start;
+    /* 滚动渐隐阴影（Lea Verou 经典配方）：仅在可滚时于边缘提示，静态零 JS */
+    background-image:
+      linear-gradient(var(--track) 40%, rgba(0, 0, 0, 0)) top / 100% 14px no-repeat local,
+      linear-gradient(rgba(0, 0, 0, 0), var(--track) 60%) bottom / 100% 14px no-repeat local,
+      radial-gradient(farthest-side at 50% 0, rgba(16, 20, 28, .16), rgba(0, 0, 0, 0)) top / 100% 14px no-repeat scroll,
+      radial-gradient(farthest-side at 50% 100%, rgba(16, 20, 28, .16), rgba(0, 0, 0, 0)) bottom / 100% 14px no-repeat scroll;
   }
+  /* GitHub Releases 式分组：组标题（新增/变更/…）加粗，条目用 lucide 圆点 */
+  .log-body .log-head { font-weight: 600; color: var(--ink); margin-top: 4px; }
+  .log-body .log-head:first-child { margin-top: 0; }
+  .log-body .log-item { display: flex; gap: 7px; }
+  .log-body .log-item .ico { width: 5px; height: 5px; margin-top: .58em; opacity: .7; }
 
   .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
@@ -554,9 +565,23 @@
           if (typeof s.log === 'string' && s.log) {
             logBody.textContent = '';
             s.log.split('\n').map(function (l) { return l.trim(); }).filter(Boolean).slice(0, 8).forEach(function (l) {
-              var line = document.createElement('div');
-              line.textContent = l.replace(/^[-·]\s*/, '');
-              logBody.appendChild(line);
+              // 无破折号的行是组标题（新增/变更/…），带破折号的是条目
+              var item = /^[-·]/.test(l);
+              var row = document.createElement('div');
+              row.className = item ? 'log-item' : 'log-head';
+              if (item) {
+                var ico = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                ico.setAttribute('class', 'ico');
+                ico.setAttribute('aria-hidden', 'true');
+                var use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+                use.setAttribute('href', '#i-dot');
+                ico.appendChild(use);
+                row.appendChild(ico);
+                row.appendChild(document.createTextNode(l.replace(/^[-·]\s*/, '')));
+              } else {
+                row.textContent = l;
+              }
+              logBody.appendChild(row);
             });
             logEl.hidden = false;
           }
