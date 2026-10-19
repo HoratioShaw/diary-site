@@ -113,7 +113,9 @@
   .cal ul.features li .ico { color: var(--cal-ring); }
   .exp ul.features li .ico { color: var(--exp-ring); }
 
-  /* 下载区：通道切换 + 版本信息 + 下载按钮 */
+  /* 下载区：通道切换 + 版本信息 + 下载按钮。
+     两卡行结构恒定对齐：tab 行 / 信息行 / 按钮行 / 提示行 / 更新行全部常驻，
+     各状态只切换行内内容或可见性，不增删占位——任何通道状态下逐行等高。 */
   .dl { margin-top: auto; padding-top: 6px; display: grid; gap: 10px; justify-items: start; }
   .chans { display: inline-flex; gap: 2px; padding: 3px; background: var(--track); border-radius: 12px; }
   .chan {
@@ -131,28 +133,45 @@
   .chan:disabled { opacity: .45; cursor: default; }
   .chan:focus-visible { outline: 2px solid var(--cal-ring); outline-offset: 2px; }
 
-  .dl-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
-  .dl-meta[hidden], .dl-meta .with-ico[hidden] { display: none; }
-  .dl-meta .with-ico { display: inline-flex; align-items: center; gap: 5px; }
-  .dl-meta .ico { width: 13px; height: 13px; }
+  /* 信息行 / 提示行：单行高恒定 + 垂直居中，行内内容切换时行高不塌 */
+  .dl-row { min-height: 26px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+  .dl-row .with-ico { display: inline-flex; align-items: center; gap: 5px; }
+  .dl-row .ico { width: 13px; height: 13px; }
+  .dl-note[hidden], .chip[hidden], .dl-row .with-ico[hidden] { display: none; }
   .chip {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 12.5px; color: var(--ink);
     border: 1px solid var(--line); border-radius: 6px; padding: 1px 8px;
   }
-  details.log summary { cursor: pointer; color: var(--muted); font-size: 13px; list-style: none; }
+  /* 更新摘要挂在 chip 行内；展开面板绝对定位浮层——零布局位移，两卡永不错动 */
+  .dl-meta { position: relative; }
+  details.log summary {
+    cursor: pointer; color: var(--muted); font-size: 13px; list-style: none;
+    display: inline-flex; align-items: center; gap: 3px;
+    padding: 7px 0; margin: -7px 0; /* 视觉行高不变，触控高度补到 40px */
+  }
   details.log summary::-webkit-details-marker { display: none; }
-  details.log summary::before { content: "▸ "; }
-  details.log[open] summary::before { content: "▾ "; }
+  details.log summary .chev { transition: transform .25s cubic-bezier(.2, 0, 0, 1); }
+  details.log.is-open summary .chev { transform: rotate(180deg); }
+  /* 展开/收起：grid 0fr→1fr 过渡 + 淡入，内层 overflow 裁切，长内容自身滚动 */
+  .log-anim {
+    position: absolute; top: calc(100% + 8px); left: 0; z-index: 5;
+    width: max-content; min-width: 240px; max-width: min(320px, calc(100vw - 80px));
+    display: grid; grid-template-rows: 0fr; opacity: 0;
+    transition: grid-template-rows .25s cubic-bezier(.2, 0, 0, 1), opacity .15s ease;
+  }
+  details.log.is-open .log-anim { grid-template-rows: 1fr; opacity: 1; }
+  .log-clip {
+    overflow: hidden; min-height: 0;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+    box-shadow: var(--shadow-hover);
+  }
   .log-body {
-    margin-top: 6px; padding: 8px 10px; max-height: 132px; overflow: auto;
-    background: var(--track); border-radius: 8px;
+    margin: 6px; padding: 6px 8px; max-height: 148px; overflow: auto;
+    background: var(--track); border-radius: 7px;
     font-size: 12.5px; line-height: 1.6; color: var(--muted);
     display: grid; gap: 2px;
   }
-
-  .dl-note, .dl-hint { font-size: 13px; color: var(--muted); }
-  .dl-note[hidden], .dl-hint[hidden] { display: none; }
 
   .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
@@ -206,7 +225,7 @@
 </style>
 </head>
 <body>
-  <!-- lucide 图标 sprite（ISC 许可）：download / smartphone / check / flask-conical / calendar -->
+  <!-- lucide 图标 sprite（ISC 许可）：download / smartphone / check / flask-conical / calendar / chevron-down -->
   <svg style="display:none" aria-hidden="true">
     <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/>
@@ -222,6 +241,9 @@
     </symbol>
     <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>
+    </symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m6 9 6 6 6-6"/>
     </symbol>
   </svg>
 
@@ -277,16 +299,19 @@
               <svg class="ico"><use href="#i-flask"/></svg>公测版
             </button>
           </div>
-          <p class="dl-note" hidden></p>
-          <div class="dl-meta" hidden>
-            <span class="chip ver"></span>
-            <span class="with-ico upd"><svg class="ico"><use href="#i-calendar"/></svg><span></span></span>
-            <details class="log"><summary>本版更新</summary><div class="log-body"></div></details>
+          <div class="dl-row"><p class="dl-note" hidden></p></div>
+          <div class="dl-row dl-meta">
+            <span class="chip ver" hidden></span>
+            <span class="with-ico upd" hidden><svg class="ico"><use href="#i-calendar"/></svg><span></span></span>
+            <details class="log" hidden>
+              <summary><svg class="ico chev"><use href="#i-chevron"/></svg>本版更新</summary>
+              <div class="log-anim"><div class="log-clip"><div class="log-body"></div></div></div>
+            </details>
           </div>
           <a class="btn is-loading" aria-busy="true">
             <svg class="ico"><use href="#i-download"/></svg><span class="btn-label">下载正式版</span>
           </a>
-          <p class="dl-hint" hidden></p>
+          <div class="dl-row"><p class="dl-hint" hidden></p></div>
         </div>
       </article>
 
@@ -319,16 +344,19 @@
               <svg class="ico"><use href="#i-flask"/></svg>公测版
             </button>
           </div>
-          <p class="dl-note" hidden></p>
-          <div class="dl-meta" hidden>
-            <span class="chip ver"></span>
-            <span class="with-ico upd"><svg class="ico"><use href="#i-calendar"/></svg><span></span></span>
-            <details class="log"><summary>本版更新</summary><div class="log-body"></div></details>
+          <div class="dl-row"><p class="dl-note" hidden></p></div>
+          <div class="dl-row dl-meta">
+            <span class="chip ver" hidden></span>
+            <span class="with-ico upd" hidden><svg class="ico"><use href="#i-calendar"/></svg><span></span></span>
+            <details class="log" hidden>
+              <summary><svg class="ico chev"><use href="#i-chevron"/></svg>本版更新</summary>
+              <div class="log-anim"><div class="log-clip"><div class="log-body"></div></div></div>
+            </details>
           </div>
           <a class="btn is-loading" aria-busy="true">
             <svg class="ico"><use href="#i-download"/></svg><span class="btn-label">下载正式版</span>
           </a>
-          <p class="dl-hint" hidden></p>
+          <div class="dl-row"><p class="dl-hint" hidden></p></div>
         </div>
       </article>
     </section>
@@ -412,16 +440,38 @@
         beta: card.querySelector('[data-chan="beta"]')
       };
       var note = card.querySelector('.dl-note');
-      var meta = card.querySelector('.dl-meta');
-      var verEl = card.querySelector('.dl-meta .ver');
-      var updEl = card.querySelector('.dl-meta .upd span');
-      var logEl = card.querySelector('.dl-meta .log');
+      var verEl = card.querySelector('.ver');
+      var updEl = card.querySelector('.upd');
+      var updText = card.querySelector('.upd span');
+      var logEl = card.querySelector('details.log');
       var logBody = card.querySelector('.log-body');
+      var logTimer = null;
       var btn = card.querySelector('.btn');
       var btnLabel = card.querySelector('.btn-label');
       var hint = card.querySelector('.dl-hint');
       var st = { stable: { status: 'loading' }, beta: { status: 'loading' } };
       var sel = 'stable';
+
+      // 收起更新行：先播完收起动画再关 open，切通道时立即复位
+      function collapseLog(immediate) {
+        if (logTimer) { clearTimeout(logTimer); logTimer = null; }
+        logEl.classList.remove('is-open');
+        if (immediate) { logEl.open = false; return; }
+        logTimer = setTimeout(function () { logEl.open = false; logTimer = null; }, 250);
+      }
+
+      logEl.querySelector('summary').addEventListener('click', function (e) {
+        e.preventDefault(); // 自管开合以获得展开动画，键盘 Enter/Space 同样走此路径
+        if (logEl.hidden) return;
+        if (logTimer) { clearTimeout(logTimer); logTimer = null; }
+        if (logEl.classList.contains('is-open')) {
+          collapseLog(false);
+        } else {
+          logEl.open = true;
+          void logEl.offsetWidth; // 强制回流，先按 0fr 落位再过渡到 1fr
+          logEl.classList.add('is-open');
+        }
+      });
 
       function render() {
         var s = st[sel];
@@ -430,8 +480,11 @@
           tabs[ch].setAttribute('aria-selected', String(ch === sel));
         });
         note.hidden = true;
-        meta.hidden = true;
+        verEl.hidden = true;
+        updEl.hidden = true;
         hint.hidden = true;
+        logEl.hidden = true;
+        collapseLog(true);
         if (s.status === 'loading') {
           btn.classList.add('is-loading');
           btn.classList.remove('is-off');
@@ -443,9 +496,10 @@
           btn.href = s.href;
           btnLabel.textContent = c.label;
           verEl.textContent = s.version;
+          verEl.hidden = false;
           var date = fmtDate(s.updated);
-          updEl.textContent = date;
-          updEl.parentNode.hidden = !date;
+          updText.textContent = date;
+          updEl.hidden = !date;
           if (s.log) {
             logBody.textContent = '';
             s.log.split('\n').map(function (l) { return l.trim(); }).filter(Boolean).slice(0, 8).forEach(function (l) {
@@ -454,10 +508,7 @@
               logBody.appendChild(line);
             });
             logEl.hidden = false;
-          } else {
-            logEl.hidden = true;
           }
-          meta.hidden = false;
           hint.textContent = c.hint;
           hint.hidden = false;
         } else {
