@@ -7,9 +7,13 @@
 <meta name="description" content="日记系列：热量日记（饮食与体重记录）与开支日记（极简记账）两款 Android 应用的官方下载入口。">
 <meta name="color-scheme" content="light dark">
 <!--
-  图标来自 lucide（ISC 许可，https://github.com/lucide/lucide），取官方 SVG 内联改写；
+  图标取自开源图标库 lucide（ISC 许可）的官方 SVG，内联改写；
   本页无任何外部运行时依赖（无 CDN 脚本 / 外部字体 / 外部图片）。
 -->
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#F4F6F8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#101317" media="(prefers-color-scheme: dark)">
 <style>
   :root {
     --bg: #F4F6F8;
@@ -86,10 +90,10 @@
     box-shadow: var(--shadow);
     display: flex;
     flex-direction: column;
-    transition: transform .18s ease, box-shadow .18s ease;
+    transition: transform .2s cubic-bezier(.2, 0, 0, 1), box-shadow .2s cubic-bezier(.2, 0, 0, 1);
   }
   @media (hover: hover) {
-    .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+    .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
   }
   .card:active { transform: translateY(0); }
 
@@ -117,7 +121,7 @@
     min-height: 40px; padding: 0 16px; border: 0; border-radius: 9px;
     background: transparent; color: var(--muted);
     font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
-    transition: background-color .15s ease, color .15s ease;
+    transition: background-color .2s cubic-bezier(.2, 0, 0, 1), color .2s cubic-bezier(.2, 0, 0, 1);
   }
   .chan .ico { width: 15px; height: 15px; }
   .chan[aria-selected="true"] {
@@ -163,6 +167,11 @@
   .exp .btn:hover { background: var(--exp-btn-hover); }
   .btn:active { transform: scale(.98); }
   .btn .ico { width: 17px; height: 17px; }
+  /* 空态/禁用按钮：不可点击、不给下载入口 */
+  .btn.is-off {
+    background: var(--track); color: var(--muted);
+    pointer-events: none; cursor: default;
+  }
   /* 探测期间的骨架态：不闪错误、不可点击 */
   .btn.is-loading { background: var(--line); color: var(--muted); pointer-events: none; }
   .btn.is-loading::after {
@@ -173,31 +182,31 @@
   }
   @keyframes shimmer { to { background-position: -200% 0; } }
 
-  .sub-link {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-size: 13.5px; color: var(--muted); text-decoration: none;
-    border-bottom: 1px solid var(--line); padding: 4px 0 1px;
-  }
-  .sub-link .ico { width: 14px; height: 14px; }
-  .sub-link:hover { color: var(--ink); }
   a:focus-visible, .btn:focus-visible { outline: 2px solid var(--cal-ring); outline-offset: 2px; border-radius: 4px; }
 
   /* 页脚 */
   footer { margin-top: auto; border-top: 1px solid var(--line); padding: 20px 0 28px; }
-  footer p { color: var(--muted); font-size: 13px; display: flex; gap: 14px; flex-wrap: wrap; }
-  footer a { color: var(--muted); text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
-  footer a .ico { width: 13px; height: 13px; }
-  footer a:hover { color: var(--ink); }
+  footer p { color: var(--muted); font-size: 13px; }
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition: none !important; }
+    .intro, .card { animation: none !important; }
     .card:hover { transform: none; }
     .btn.is-loading::after { animation: none; }
   }
+
+  /* 动效统一：入场/抬升/切换一套缓动，单次不超过 400ms */
+  @keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .intro { animation: fade-in-up .32s cubic-bezier(.2, 0, 0, 1) backwards; }
+  .cards .card:nth-child(1) { animation: fade-in-up .32s cubic-bezier(.2, 0, 0, 1) .06s backwards; }
+  .cards .card:nth-child(2) { animation: fade-in-up .32s cubic-bezier(.2, 0, 0, 1) .14s backwards; }
 </style>
 </head>
 <body>
-  <!-- lucide 图标 sprite（ISC 许可）：download / smartphone / check / external-link / github / flask-conical / calendar -->
+  <!-- lucide 图标 sprite（ISC 许可）：download / smartphone / check / flask-conical / calendar -->
   <svg style="display:none" aria-hidden="true">
     <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/>
@@ -207,12 +216,6 @@
     </symbol>
     <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M20 6 9 17l-5-5"/>
-    </symbol>
-    <symbol id="i-external-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-    </symbol>
-    <symbol id="i-github" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/>
     </symbol>
     <symbol id="i-flask" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/><path d="M6.453 15h11.094"/><path d="M8.5 2h7"/>
@@ -240,7 +243,7 @@
       <h1>把每天的记录，做得轻一点</h1>
       <p>两款 Android 记录应用：一款记吃了什么、体重变化，一款记钱花到了哪里。无广告，支持云同步，数据在自己手里。</p>
       <noscript>
-        <p class="noscript-note">当前浏览器未启用 JavaScript：下载按钮会直接进入对应通道的下载目录，在目录中选择版本文件夹里的 .apk 安装即可。</p>
+        <p class="noscript-note">当前浏览器未启用 JavaScript：通道探测无法完成，下载按钮不可用。请启用 JavaScript 后刷新页面。</p>
       </noscript>
     </section>
 
@@ -280,13 +283,10 @@
             <span class="with-ico upd"><svg class="ico"><use href="#i-calendar"/></svg><span></span></span>
             <details class="log"><summary>本版更新</summary><div class="log-body"></div></details>
           </div>
-          <a class="btn" href="https://storage.horatio.cn/CalorieDiary/stable/" target="_blank" rel="noopener">
+          <a class="btn is-loading" aria-busy="true">
             <svg class="ico"><use href="#i-download"/></svg><span class="btn-label">下载正式版</span>
           </a>
           <p class="dl-hint" hidden></p>
-          <a class="sub-link" href="https://github.com/HoratioShaw/calorie-diary" target="_blank" rel="noopener">
-            <svg class="ico"><use href="#i-github"/></svg>GitHub 仓库<svg class="ico"><use href="#i-external-link"/></svg>
-          </a>
         </div>
       </article>
 
@@ -325,13 +325,10 @@
             <span class="with-ico upd"><svg class="ico"><use href="#i-calendar"/></svg><span></span></span>
             <details class="log"><summary>本版更新</summary><div class="log-body"></div></details>
           </div>
-          <a class="btn" href="https://storage.horatio.cn/ExpenseDiary/stable/" target="_blank" rel="noopener">
+          <a class="btn is-loading" aria-busy="true">
             <svg class="ico"><use href="#i-download"/></svg><span class="btn-label">下载正式版</span>
           </a>
           <p class="dl-hint" hidden></p>
-          <a class="sub-link" href="https://github.com/HoratioShaw/expense-diary" target="_blank" rel="noopener">
-            <svg class="ico"><use href="#i-github"/></svg>GitHub 仓库<svg class="ico"><use href="#i-external-link"/></svg>
-          </a>
         </div>
       </article>
     </section>
@@ -339,17 +336,18 @@
 
   <footer>
     <div class="wrap">
-      <p>© 2026·屑涵</p>
+      <p>© 2026 · 屑涵</p>
     </div>
   </footer>
 
   <script>
   // 下载通道探测：OpenList 的裸 GET 一律返回 SPA 壳，读文件必须走 /api/fs/get 换 raw_url。
-  // APK 直链同理——download_url 裸 GET 会拿到 HTML，页面加载时用 fs/get 换签名 raw_url 作 href，
-  // 任何一步失败都退回通道目录页，不向控制台抛错。
+  // APK 直链同理——download_url 裸 GET 会拿到 HTML，页面加载时用 fs/get 换签名 raw_url 作 href。
+  // 没探测到 version.json 的通道视为未发布：tab 禁用、不给任何下载入口；探测失败静默处理，不刷控制台。
   (function () {
     var STORAGE = 'https://storage.horatio.cn';
     var TIMEOUT = 8000;
+    var ORDER = ['stable', 'beta'];
 
     function fetchWithTimeout(url, opts) {
       var ctrl = new AbortController();
@@ -371,33 +369,28 @@
     }
 
     function loadChannel(dir, ch) {
-      var base = '/' + dir + '/' + ch + '/';
-      return fetchRaw(base + 'version.json').then(function (raw) {
+      return fetchRaw('/' + dir + '/' + ch + '/version.json').then(function (raw) {
         if (!raw) return { status: 'empty' };
         return fetchWithTimeout(raw)
           .then(function (r) { return r.ok ? r.json() : null; })
           .catch(function () { return null; })
           .then(function (meta) {
-            if (!meta || !meta.version_name) return { status: 'error' };
+            if (!meta || !meta.version_name || !meta.download_url) return { status: 'error' };
             var apkPath = null;
             try { apkPath = new URL(meta.download_url, STORAGE).pathname; } catch (e) {}
-            var dirUrl = STORAGE + base;
-            if (!apkPath) return ready(meta, dirUrl);
+            if (!apkPath) return { status: 'error' };
             return fetchRaw(apkPath).then(function (apkRaw) {
-              return ready(meta, apkRaw || dirUrl);
+              if (!apkRaw) return { status: 'error' };
+              return {
+                status: 'ready',
+                version: meta.version_name,
+                updated: meta.updated_at || '',
+                log: meta.changelog || '',
+                href: apkRaw
+              };
             });
           });
       });
-    }
-
-    function ready(meta, href) {
-      return {
-        status: 'ready',
-        version: meta.version_name,
-        updated: meta.updated_at || '',
-        log: meta.changelog || '',
-        href: href
-      };
     }
 
     function fmtDate(iso) {
@@ -408,8 +401,8 @@
     }
 
     var CH = {
-      stable: { label: '下载正式版', empty: 'stable 暂未发布', error: 'stable 版本信息获取失败', hint: '稳定版本，适合日常使用。' },
-      beta: { label: '下载公测版', empty: '公测通道暂未发布版本', error: '公测版本信息获取失败', hint: '抢先体验新功能，可能存在小问题。' }
+      stable: { label: '下载正式版', empty: '暂未发布', error: '获取失败', hint: '稳定版本，适合日常使用。' },
+      beta: { label: '下载公测版', empty: '暂未发布', error: '获取失败', hint: '抢先体验新功能，可能存在小问题。' }
     };
 
     document.querySelectorAll('.card[data-app]').forEach(function (card) {
@@ -433,8 +426,7 @@
       function render() {
         var s = st[sel];
         var c = CH[sel];
-        var dirUrl = STORAGE + '/' + dir + '/' + sel + '/';
-        ['stable', 'beta'].forEach(function (ch) {
+        ORDER.forEach(function (ch) {
           tabs[ch].setAttribute('aria-selected', String(ch === sel));
         });
         note.hidden = true;
@@ -442,14 +434,14 @@
         hint.hidden = true;
         if (s.status === 'loading') {
           btn.classList.add('is-loading');
+          btn.classList.remove('is-off');
           btn.setAttribute('aria-busy', 'true');
           btnLabel.textContent = c.label;
-          btn.href = dirUrl;
         } else if (s.status === 'ready') {
-          btn.classList.remove('is-loading');
+          btn.classList.remove('is-loading', 'is-off');
           btn.removeAttribute('aria-busy');
-          btnLabel.textContent = c.label;
           btn.href = s.href;
+          btnLabel.textContent = c.label;
           verEl.textContent = s.version;
           var date = fmtDate(s.updated);
           updEl.textContent = date;
@@ -469,27 +461,33 @@
           hint.textContent = c.hint;
           hint.hidden = false;
         } else {
+          // 未发布或探测失败：统一空态，禁用按钮、不留下载入口
           btn.classList.remove('is-loading');
+          btn.classList.add('is-off');
           btn.removeAttribute('aria-busy');
-          btnLabel.textContent = '前往下载目录';
-          btn.href = dirUrl;
-          note.textContent = s.status === 'empty' ? c.empty : c.error;
+          btn.removeAttribute('href');
+          btnLabel.textContent = '暂无版本';
+          note.textContent = s.status === 'error' ? '版本信息获取失败，请稍后重试' : '暂无可下载版本';
           note.hidden = false;
         }
       }
 
       function finish() {
-        tabs.stable.disabled = st.stable.status !== 'ready' && st.beta.status === 'ready';
-        tabs.beta.disabled = st.beta.status !== 'ready' && st.stable.status === 'ready';
-        tabs.stable.title = tabs.stable.disabled ? CH.stable.empty : '';
-        tabs.beta.title = tabs.beta.disabled ? CH.beta.empty : '';
-        if (st[sel].status !== 'ready' && tabs[sel].disabled) {
-          sel = sel === 'stable' ? 'beta' : 'stable';
-        }
+        var firstReady = null;
+        ORDER.forEach(function (ch) {
+          if (st[ch].status === 'ready' && firstReady === null) firstReady = ch;
+        });
+        // 默认选中第一个有版本的通道；两个都没有则停在 stable 的空态
+        sel = firstReady || 'stable';
+        ORDER.forEach(function (ch) {
+          var off = st[ch].status !== 'ready';
+          tabs[ch].disabled = off;
+          tabs[ch].title = off ? (st[ch].status === 'error' ? CH[ch].error : CH[ch].empty) : '';
+        });
         render();
       }
 
-      Object.keys(tabs).forEach(function (ch) {
+      ORDER.forEach(function (ch) {
         tabs[ch].addEventListener('click', function () {
           if (tabs[ch].disabled || ch === sel) return;
           sel = ch;
@@ -498,7 +496,7 @@
       });
 
       render();
-      Promise.all(Object.keys(CH).map(function (ch) {
+      Promise.all(ORDER.map(function (ch) {
         return loadChannel(dir, ch).then(function (res) {
           st[ch] = res;
           if (ch === sel) render();
