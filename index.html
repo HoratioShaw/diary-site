@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>日记系列 · 热量日记与开支日记</title>
+<meta name="description" content="日记系列：热量日记（饮食与体重记录）与开支日记（极简记账）两款 Android 应用的官方下载入口。">
+<meta name="color-scheme" content="light dark">
+<style>
+  :root {
+    --bg: #F4F6F8;
+    --surface: #FFFFFF;
+    --ink: #1B1D21;
+    --muted: #565B63;
+    --line: #E4E7EB;
+    --cal-ring: #3482FF;
+    --cal-btn: #1E63D8;
+    --cal-btn-hover: #1A56BE;
+    --exp-ring: #4A672D;
+    --exp-btn: #4A672D;
+    --exp-btn-hover: #3D5625;
+    --shadow: 0 1px 2px rgba(16, 20, 28, .06), 0 6px 20px rgba(16, 20, 28, .07);
+    --shadow-hover: 0 2px 4px rgba(16, 20, 28, .08), 0 12px 28px rgba(16, 20, 28, .12);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101317;
+      --surface: #181B20;
+      --ink: #E9EBEF;
+      --muted: #A0A6AF;
+      --line: #282C33;
+      --cal-ring: #78ADFF;
+      --exp-ring: #A6C377;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 6px 20px rgba(0, 0, 0, .35);
+      --shadow-hover: 0 2px 4px rgba(0, 0, 0, .45), 0 12px 28px rgba(0, 0, 0, .45);
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC",
+      "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    line-height: 1.65;
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+  }
+  .wrap { width: 100%; max-width: 880px; margin: 0 auto; padding: 0 20px; }
+
+  /* 顶栏 */
+  header { padding: 22px 0; border-bottom: 1px solid var(--line); }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; letter-spacing: .01em; }
+  .brand .mark { flex: none; }
+  .brand .domain { color: var(--muted); font-weight: 500; font-size: 14px; }
+
+  /* 引言 */
+  .intro { padding: 44px 0 8px; }
+  .intro h1 { font-size: 28px; line-height: 1.35; letter-spacing: .01em; }
+  .intro p { margin-top: 10px; color: var(--muted); font-size: 16px; max-width: 34em; }
+
+  /* 卡片 */
+  .cards { display: grid; grid-template-columns: 1fr; gap: 20px; padding: 28px 0 40px; }
+  @media (min-width: 720px) { .cards { grid-template-columns: 1fr 1fr; } }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 26px 24px 24px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  @media (hover: hover) {
+    .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+  }
+  .card:active { transform: translateY(0); }
+
+  .card-head { display: flex; align-items: center; gap: 14px; }
+  .card-head h2 { font-size: 23px; line-height: 1.3; letter-spacing: .01em; }
+  .card-head .tag { font-size: 13px; color: var(--muted); font-weight: 500; }
+  .slogan { margin-top: 12px; font-size: 15px; font-weight: 600; }
+  .desc { margin-top: 6px; font-size: 14px; color: var(--muted); }
+
+  ul.features { list-style: none; margin: 16px 0 22px; display: grid; gap: 9px; }
+  ul.features li { position: relative; padding-left: 18px; font-size: 14.5px; }
+  ul.features li::before {
+    content: ""; position: absolute; left: 2px; top: .68em;
+    width: 6px; height: 6px; border-radius: 50%;
+  }
+  .cal ul.features li::before { background: var(--cal-ring); }
+  .exp ul.features li::before { background: var(--exp-ring); }
+
+  .actions { margin-top: auto; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 42px; padding: 0 22px; border-radius: 11px;
+    color: #fff; font-size: 15px; font-weight: 600; text-decoration: none;
+    transition: background-color .15s ease, transform .1s ease;
+  }
+  .cal .btn { background: var(--cal-btn); }
+  .cal .btn:hover { background: var(--cal-btn-hover); }
+  .exp .btn { background: var(--exp-btn); }
+  .exp .btn:hover { background: var(--exp-btn-hover); }
+  .btn:active { transform: scale(.98); }
+  .sub-link { font-size: 13.5px; color: var(--muted); text-decoration: none; border-bottom: 1px solid var(--line); padding-bottom: 1px; }
+  .sub-link:hover { color: var(--ink); }
+  a:focus-visible, .btn:focus-visible { outline: 2px solid var(--cal-ring); outline-offset: 2px; border-radius: 4px; }
+
+  /* 页脚 */
+  footer { margin-top: auto; border-top: 1px solid var(--line); padding: 20px 0 28px; }
+  footer p { color: var(--muted); font-size: 13px; display: flex; gap: 14px; flex-wrap: wrap; }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--ink); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; }
+    .card:hover { transform: none; }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="wrap brand">
+      <svg class="mark" width="26" height="26" viewBox="0 0 26 26" aria-hidden="true">
+        <circle cx="10" cy="13" r="7.5" fill="none" stroke="#3482FF" stroke-width="3.2"
+                stroke-dasharray="33 14" stroke-linecap="round" transform="rotate(-90 10 13)"/>
+        <circle cx="18" cy="13" r="7.5" fill="none" stroke="#4A672D" stroke-width="3.2"
+                stroke-dasharray="21 26" stroke-linecap="round" transform="rotate(-90 18 13)"/>
+      </svg>
+      <span>日记系列</span>
+      <span class="domain">daily.horatio.cn</span>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="intro">
+      <h1>把每天的记录，做得轻一点</h1>
+      <p>两款 Android 记录应用：一款记吃了什么、体重变化，一款记钱花到了哪里。无广告，支持云同步，数据在自己手里。</p>
+    </section>
+
+    <section class="cards">
+      <article class="card cal">
+        <div class="card-head">
+          <svg width="52" height="52" viewBox="0 0 52 52" aria-hidden="true">
+            <circle cx="26" cy="26" r="21" fill="none" stroke="var(--line)" stroke-width="5"/>
+            <circle cx="26" cy="26" r="21" fill="none" stroke="var(--cal-ring)" stroke-width="5"
+                    stroke-linecap="round" stroke-dasharray="92 40" transform="rotate(-90 26 26)"/>
+          </svg>
+          <div>
+            <h2>热量日记</h2>
+            <div class="tag">饮食与体重记录 · Android</div>
+          </div>
+        </div>
+        <p class="slogan">把「今天吃了什么」变得毫无负担，减重、增重都能记。</p>
+        <p class="desc">打开点一下加号：拍张照、选张图，或者写一句「中午吃了一碗米饭和一个小炒肉」——克数、热量与营养素自动算好。</p>
+        <ul class="features">
+          <li>拍照 / 一句话 AI 识餐，自动解析菜品、克数与热量</li>
+          <li>按身高体重算每日热量预算，碳水蛋白脂肪进度一目了然</li>
+          <li>体重趋势、喝水打卡、断食计时与周报分享</li>
+          <li>邮箱注册登录，记录自动云同步，换手机不丢</li>
+        </ul>
+        <div class="actions">
+          <a class="btn" href="https://storage.horatio.cn/CalorieDiary/stable/" target="_blank" rel="noopener">下载正式版</a>
+          <a class="sub-link" href="https://github.com/HoratioShaw/calorie-diary" target="_blank" rel="noopener">GitHub 仓库 · 内测 / 公测通道</a>
+        </div>
+      </article>
+
+      <article class="card exp">
+        <div class="card-head">
+          <svg width="52" height="52" viewBox="0 0 52 52" aria-hidden="true">
+            <circle cx="26" cy="26" r="21" fill="none" stroke="var(--line)" stroke-width="5"/>
+            <circle cx="26" cy="26" r="21" fill="none" stroke="var(--exp-ring)" stroke-width="5"
+                    stroke-linecap="round" stroke-dasharray="60 72" transform="rotate(-90 26 26)"/>
+          </svg>
+          <div>
+            <h2>开支日记</h2>
+            <div class="tag">极简记账 · Android</div>
+          </div>
+        </div>
+        <p class="slogan">3 秒记一笔，看清钱花在了哪里。</p>
+        <p class="desc">打开就是「记一笔」：金额一敲、分类一点，收支落账；无广告、无开屏、无理财推荐——只做记账这一件事。</p>
+        <ul class="features">
+          <li>金额键盘快速落账，也支持一句话 AI 记账</li>
+          <li>首页环形预算实时显示今天还能花多少</li>
+          <li>分类统计报表、月度预算、微信 / 支付宝账单导入</li>
+          <li>数据默认存本机，登录后可云同步，随时 JSON 备份导出</li>
+        </ul>
+        <div class="actions">
+          <a class="btn" href="https://storage.horatio.cn/ExpenseDiary/stable/" target="_blank" rel="noopener">下载正式版</a>
+          <a class="sub-link" href="https://github.com/HoratioShaw/expense-diary" target="_blank" rel="noopener">GitHub 仓库 · 内测 / 公测通道</a>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>
+        <span>© 2026 Horatio</span>
+        <a href="https://github.com/HoratioShaw" target="_blank" rel="noopener">GitHub @HoratioShaw</a>
+        <a href="https://caloriediary.horatio.cn" target="_blank" rel="noopener">caloriediary.horatio.cn</a>
+      </p>
+    </div>
+  </footer>
+</body>
+</html>

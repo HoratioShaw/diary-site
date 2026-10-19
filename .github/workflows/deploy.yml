@@ -1,0 +1,55 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare SSH key
+        env:
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          install -m 600 /dev/null "$RUNNER_TEMP/site_key"
+          printf '%s\n' "$SERVER_SSH_KEY" > "$RUNNER_TEMP/site_key"
+
+      # 部署前先看一眼目标目录：只有确认过里面有什么，rsync 的排除清单才可信
+      - name: Confirm target directory
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+        run: |
+          set -euo pipefail
+          ssh -i "$RUNNER_TEMP/site_key" -o StrictHostKeyChecking=accept-new -o BatchMode=yes \
+            "$SERVER_USER@$SERVER_HOST" 'ls -A /www/wwwroot/daily.horatio.cn'
+
+      # 不用 --delete：站点只有单文件页面，残留比误删安全；
+      # 面板/证书文件（.user.ini .htaccess .well-known）按约定永不传输、永不删除
+      - name: Deploy via rsync
+        env:
+          SERVER_HOST: ${{ secrets.SERVER_HOST }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+        run: |
+          set -euo pipefail
+          rsync -avz \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='README.md' \
+            --exclude='.user.ini' \
+            --exclude='.htaccess' \
+            --exclude='.well-known' \
+            -e "ssh -i $RUNNER_TEMP/site_key -o StrictHostKeyChecking=accept-new -o BatchMode=yes" \
+            ./ "$SERVER_USER@$SERVER_HOST:/www/wwwroot/daily.horatio.cn/"
+
+      - name: Cleanup SSH key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/site_key"
