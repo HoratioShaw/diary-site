@@ -30,7 +30,7 @@ jobs:
         run: |
           set -euo pipefail
           ssh -i "$RUNNER_TEMP/site_key" -o StrictHostKeyChecking=accept-new -o BatchMode=yes \
-            "$SERVER_USER@$SERVER_HOST" 'ls -A /www/wwwroot/daily.horatio.cn'
+            "$SERVER_USER@$SERVER_HOST" 'ls -A /www/wwwroot/diary.horatio.cn'
 
       # 不用 --delete：站点只有单文件页面，残留比误删安全；
       # 面板/证书文件（.user.ini .htaccess .well-known）按约定永不传输、永不删除
@@ -48,7 +48,7 @@ jobs:
             --exclude='.htaccess' \
             --exclude='.well-known' \
             -e "ssh -i $RUNNER_TEMP/site_key -o StrictHostKeyChecking=accept-new -o BatchMode=yes" \
-            ./ "$SERVER_USER@$SERVER_HOST:/www/wwwroot/daily.horatio.cn/"
+            ./ "$SERVER_USER@$SERVER_HOST:/www/wwwroot/diary.horatio.cn/"
 
       - name: Cleanup SSH key
         if: always()
