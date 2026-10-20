@@ -676,12 +676,12 @@
       }
 
       function finish() {
-        var firstReady = null;
-        ORDER.forEach(function (ch) {
-          if (st[ch].status === 'ready' && firstReady === null) firstReady = ch;
-        });
-        // 用户手动选过且选中的通道有版本 → 尊重选择；否则默认选中第一个有版本的通道
-        if (!(userPicked && st[sel].status === 'ready')) sel = firstReady || 'stable';
+        // 作者定稿：每次加载默认「正式版」；只有正式版确认缺席（empty=未发布）才落到测试版。
+        // 正式版探测失败（error，未知）不算缺席——保持默认在正式版，不悄悄跳测试版。
+        // 同一次加载内用户手动选择仍被尊重（含回焦自动复探），刷新后重置、不跨次记忆。
+        if (!(userPicked && st[sel].status === 'ready')) {
+          sel = (st.stable.status === 'empty' && st.beta.status === 'ready') ? 'beta' : 'stable';
+        }
         ORDER.forEach(function (ch) {
           var s = st[ch];
           var off = s.status !== 'ready';
