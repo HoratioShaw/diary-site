@@ -1,12 +1,12 @@
 <!-- 站点图标：lucide notebook-pen（ISC 许可，https://lucide.dev/license），与页头图标同源；
-     路径照抄官方 SVG，主题色沿用页面蓝，浅深色两态内嵌切换 -->
+     路径照抄官方 SVG，主题色沿用页面 miuix 主色 #3482FF，浅深色两态内嵌切换 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <style>
-    .bg { fill: #F4F6F8; }
+    .bg { fill: #F7F7F7; }
     .ink { stroke: #3482FF; }
     @media (prefers-color-scheme: dark) {
-      .bg { fill: #101317; }
-      .ink { stroke: #78ADFF; }
+      .bg { fill: #000000; }
+      .ink { stroke: #3482FF; }
     }
   </style>
   <rect class="bg" width="64" height="64" rx="14"/>

@@ -2,139 +2,168 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>日记系列 · 热量日记与开支日记</title>
 <meta name="description" content="日记系列：热量日记（饮食与体重记录）与开支日记（极简记账）两款 Android 应用的官方下载入口。">
 <meta name="color-scheme" content="light dark">
 <!--
   图标取自开源图标库 lucide（ISC 许可，https://lucide.dev/license）的官方 SVG，内联改写；
-  本页无任何外部运行时依赖（无 CDN 脚本 / 外部字体 / 外部图片）。
+  卡片 App 图标 = squircle（超椭圆 |x|⁵+|y|⁵=1，108 视口 8% 留白）蓝渐变底 + 白色 lucide 字形，
+  渐变与两 App 启动图标 ic_launcher_background 同源（ARGB #FF4D95FF→#FF2B6DE8，
+  展开即 #4495FF→#2B6DE8 竖直渐变），字形路径照抄两仓 ic_launcher_foreground.xml。
+  本页无任何外部运行时依赖（无 CDN 脚本 / 外部字体 / 外部图片），字体走系统字体栈。
 -->
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="theme-color" content="#F4F6F8" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#101317" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#3482FF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <style>
   :root {
-    --bg: #F4F6F8;
-    --surface: #FFFFFF;
-    --ink: #1B1D21;
-    --muted: #565B63;
-    --line: #E4E7EB;
-    --track: #EDF0F3;
-    --cal-ring: #3482FF;
-    --cal-btn: #1E63D8;
-    --cal-btn-hover: #1A56BE;
-    --exp-ring: #4A672D;
-    --exp-btn: #4A672D;
-    --exp-btn-hover: #3D5625;
-    --shadow: 0 1px 2px rgba(16, 20, 28, .06), 0 6px 20px rgba(16, 20, 28, .07);
-    --shadow-hover: 0 2px 4px rgba(16, 20, 28, .08), 0 12px 28px rgba(16, 20, 28, .12);
+    color-scheme: light dark;
+    /* ── miuix 设计 token（浅色） ───────────────────────── */
+    --primary: #3482FF;            /* 主色：焦点环 / 图标 / 强调元素 */
+    --primary-deep: #2C6ED9;       /* 主色压暗伴生色：白字按钮达 WCAG AA 4.84:1 */
+    --primary-deep-hover: #2762BF;
+    --canvas: #F7F7F7;
+    --card: #FFFFFF;
+    --ink: #000000;
+    --ink-2: rgba(0, 0, 0, .6);    /* 次文 60% 灰 */
+    --line: #E0E0E0;
+    --btn2: #F0F0F0;               /* 次要按钮 / 轨道 底 */
+    --btn2-ink: #303030;           /* 次要按钮 字 */
+    --shimmer: rgba(255, 255, 255, .85);
+    --fade: rgba(0, 0, 0, .16);
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, .04), 0 8px 24px rgba(0, 0, 0, .06);
+    --shadow-2: 0 2px 6px rgba(0, 0, 0, .06), 0 16px 36px rgba(0, 0, 0, .1);
+    --ico-shadow: drop-shadow(0 8px 16px rgba(43, 109, 232, .22));
+    --gutter: clamp(16px, 4vw, 32px);
+    --font: MiSans, -apple-system, "HarmonyOS Sans SC", "PingFang SC",
+      "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #101317;
-      --surface: #181B20;
-      --ink: #E9EBEF;
-      --muted: #A0A6AF;
-      --line: #282C33;
-      --track: #22262C;
-      --cal-ring: #78ADFF;
-      --exp-ring: #A6C377;
-      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 6px 20px rgba(0, 0, 0, .35);
-      --shadow-hover: 0 2px 4px rgba(0, 0, 0, .45), 0 12px 28px rgba(0, 0, 0, .45);
+      --canvas: #000000;
+      --card: #242424;
+      --ink: rgba(255, 255, 255, .9);    /* #E6FFFFFF */
+      --ink-2: rgba(255, 255, 255, .6);  /* 次文 60% 灰 */
+      --line: #393939;
+      --btn2: #434343;
+      --btn2-ink: #D9D9D9;
+      --shimmer: rgba(255, 255, 255, .12);
+      --fade: rgba(255, 255, 255, .3);
+      --shadow-1: 0 1px 2px rgba(0, 0, 0, .5), 0 8px 24px rgba(0, 0, 0, .45);
+      --shadow-2: 0 2px 6px rgba(0, 0, 0, .55), 0 16px 36px rgba(0, 0, 0, .5);
+      --ico-shadow: drop-shadow(0 8px 18px rgba(43, 109, 232, .4));
     }
   }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { -webkit-text-size-adjust: 100%; }
   body {
-    background: var(--bg);
+    background: var(--canvas);
     color: var(--ink);
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC",
-      "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    font-family: var(--font);
     font-size: 16px;
-    line-height: 1.65;
+    line-height: 1.6;
     display: flex;
     min-height: 100vh;
+    min-height: 100dvh;
     flex-direction: column;
   }
-  .wrap { width: 100%; max-width: 880px; margin: 0 auto; padding: 0 20px; }
+  /* 居中容器：PC 上限 960px，手机水平 padding ≥16px，刘海/圆角安全区补白，永不横向滚动 */
+  .wrap {
+    width: 100%;
+    max-width: 960px;
+    margin-inline: auto;
+    padding-left: max(var(--gutter), env(safe-area-inset-left));
+    padding-right: max(var(--gutter), env(safe-area-inset-right));
+  }
 
   /* 图标（lucide 内联）：默认 1em，随文字对齐，颜色继承 currentColor */
   .ico { width: 1em; height: 1em; flex: none; vertical-align: -.125em; }
 
   /* 顶栏 */
-  header { padding: 22px 0; border-bottom: 1px solid var(--line); }
-  .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; letter-spacing: .01em; }
-  .brand .mark { flex: none; }
-  .brand .domain { color: var(--muted); font-weight: 500; font-size: 14px; }
+  header { padding: clamp(16px, 3vw, 26px) 0; }
+  .brand { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 600; letter-spacing: .01em; }
+  .brand .mark { flex: none; color: var(--primary); }
+  .brand .domain { color: var(--ink-2); font-weight: 400; font-size: 13px; }
 
-  /* 引言 */
-  .intro { padding: 44px 0 8px; }
-  .intro h1 { font-size: clamp(25px, 5.5vw, 30px); line-height: 1.35; letter-spacing: .01em; }
-  .intro p { margin-top: 10px; color: var(--muted); font-size: 16px; max-width: 34em; }
+  /* 引言 / hero：大标题只靠字号分层，Normal 字重 */
+  .intro { padding: clamp(40px, 9vw, 76px) 0 clamp(24px, 4vw, 40px); }
+  .intro h1 { font-size: clamp(26px, 5vw, 32px); line-height: 1.3; font-weight: 400; letter-spacing: .01em; }
+  .intro p { margin-top: 14px; color: var(--ink-2); font-size: 16px; max-width: 40em; }
   .noscript-note {
-    margin-top: 14px; padding: 10px 14px; border: 1px dashed var(--line);
-    border-radius: 10px; font-size: 13.5px; color: var(--muted);
+    margin-top: 16px; padding: 12px 16px; background: var(--card);
+    border: 1px dashed var(--line); border-radius: 16px;
+    font-size: 14px; color: var(--ink-2);
   }
 
-  /* 卡片 */
-  .cards { display: grid; grid-template-columns: 1fr; gap: 20px; padding: 28px 0 40px; }
-  @media (min-width: 720px) { .cards { grid-template-columns: 1fr 1fr; } }
+  /* 卡片：手机单列全宽，≥768px 双卡并排 */
+  .cards { display: grid; grid-template-columns: 1fr; gap: 16px; padding-bottom: clamp(40px, 7vw, 72px); }
+  @media (min-width: 768px) { .cards { grid-template-columns: 1fr 1fr; gap: 24px; } }
 
   .card {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 16px;
-    padding: 26px 24px 24px;
-    box-shadow: var(--shadow);
+    background: var(--card);
+    border-radius: 24px;
+    padding: clamp(20px, 3vw, 28px);
+    box-shadow: var(--shadow-1);
     display: flex;
     flex-direction: column;
-    transition: transform .2s cubic-bezier(.2, 0, 0, 1), box-shadow .2s cubic-bezier(.2, 0, 0, 1);
+    transition: transform .18s ease, box-shadow .18s ease;
   }
   @media (hover: hover) {
-    .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+    .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-2); }
   }
   .card:active { transform: translateY(0); }
 
-  .card-head { display: flex; align-items: center; gap: 14px; }
-  .card-head .app-ico { flex: none; }
-  .cal .app-ico { color: var(--cal-ring); }
-  .exp .app-ico { color: var(--exp-ring); }
-  .card-head h2 { font-size: 23px; line-height: 1.3; letter-spacing: .01em; }
+  /* 卡片头：squircle App 图标（108 视口、8% 留白 → 可视 56~64px） */
+  .card-head { display: flex; align-items: center; gap: 16px; }
+  .card-head .app-ico { flex: none; width: 64px; height: 64px; color: #fff; filter: var(--ico-shadow); }
+  @media (min-width: 768px) { .card-head .app-ico { width: 72px; height: 72px; } }
+  .card-head h2 { font-size: 24px; line-height: 1.3; font-weight: 400; letter-spacing: .01em; }
   .card-head .tag {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 13px; color: var(--muted); font-weight: 500;
+    display: flex; align-items: center; gap: 6px; margin-top: 4px;
+    font-size: 13px; color: var(--ink-2);
   }
   .card-head .tag .ico { width: 14px; height: 14px; }
-  .slogan { margin-top: 12px; font-size: 15px; font-weight: 600; }
-  .desc { margin-top: 6px; font-size: 14px; color: var(--muted); }
+  .slogan { margin-top: 18px; font-size: 16px; font-weight: 600; }
+  .desc { margin-top: 8px; font-size: 14px; color: var(--ink-2); }
 
-  ul.features { list-style: none; margin: 16px 0 22px; display: grid; gap: 9px; }
-  ul.features li { display: flex; gap: 9px; font-size: 14.5px; }
-  ul.features li .ico { width: 15px; height: 15px; margin-top: .24em; stroke-width: 2.4; }
-  .cal ul.features li .ico { color: var(--cal-ring); }
-  .exp ul.features li .ico { color: var(--exp-ring); }
+  ul.features { list-style: none; margin: 18px 0 20px; display: grid; gap: 10px; }
+  ul.features li { display: flex; gap: 10px; font-size: 16px; line-height: 1.6; }
+  ul.features li .ico { width: 16px; height: 16px; margin-top: .3em; flex: none; color: var(--primary); }
 
   /* 下载区：通道切换 + 版本信息 + 下载按钮。
      两卡行结构恒定对齐：tab 行 / 信息行 / 按钮行 / 提示行 / 更新行全部常驻，
      各状态只切换行内内容或可见性，不增删占位——任何通道状态下逐行等高。 */
-  .dl { margin-top: auto; padding-top: 6px; display: grid; gap: 10px; justify-items: start; }
-  .chans { display: inline-flex; gap: 2px; padding: 3px; background: var(--track); border-radius: 12px; }
+  .dl {
+    margin-top: auto; padding-top: 20px;
+    border-top: 1px solid var(--line);
+    display: grid; gap: 10px; justify-items: stretch;
+  }
+  @media (min-width: 768px) { .dl { justify-items: start; } }
+
+  /* 分段控件（次要态底 + 反白选中药丸） */
+  .chans { display: flex; gap: 4px; padding: 4px; background: var(--btn2); border-radius: 16px; }
   .chan {
-    display: inline-flex; align-items: center; gap: 6px;
-    min-height: 40px; padding: 0 16px; border: 0; border-radius: 9px;
-    background: transparent; color: var(--muted);
+    flex: 1 1 0;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    min-height: 44px; padding: 0 14px; border: 0; border-radius: 12px;
+    background: transparent; color: var(--ink-2);
     font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
-    transition: background-color .2s cubic-bezier(.2, 0, 0, 1), color .2s cubic-bezier(.2, 0, 0, 1);
+    transition: background-color .16s ease, color .16s ease, box-shadow .16s ease;
   }
   .chan .ico { width: 15px; height: 15px; }
   .chan[aria-checked="true"] {
-    background: var(--surface); color: var(--ink);
-    box-shadow: 0 1px 2px rgba(16, 20, 28, .1);
+    background: var(--card); color: var(--ink);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .14);
   }
-  .chan[aria-disabled="true"] { opacity: .45; cursor: default; }
-  .chan:focus-visible { outline: 2px solid var(--cal-ring); outline-offset: 2px; }
+  .chan[aria-disabled="true"] { opacity: .5; cursor: default; }
+  .chan:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+  @media (min-width: 768px) {
+    .chans { display: inline-flex; }
+    .chan { flex: 0 0 auto; padding: 0 18px; }
+  }
   /* 仅供读屏的通道禁用说明，绝不参与布局 */
   .sr-only {
     position: absolute; width: 1px; height: 1px;
@@ -142,89 +171,97 @@
   }
 
   /* 信息行 / 提示行：单行高恒定 + 垂直居中，行内内容切换时行高不塌 */
-  .dl-row { min-height: 26px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+  .dl-row { min-height: 26px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); }
   .dl-row .with-ico { display: inline-flex; align-items: center; gap: 5px; }
   .dl-row .ico { width: 13px; height: 13px; }
-  .dl-note[hidden], .chip[hidden], .dl-row .with-ico[hidden] { display: none; }
+  .dl-note[hidden], .dl-hint[hidden], .chip[hidden], .dl-row .with-ico[hidden], details.log[hidden] { display: none; }
   .chip {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 12.5px; color: var(--ink);
-    border: 1px solid var(--line); border-radius: 6px; padding: 1px 8px;
+    border: 1px solid var(--line); border-radius: 8px; padding: 2px 8px;
   }
   /* 更新摘要挂在 chip 行内；展开面板绝对定位浮层——零布局位移，两卡永不错动 */
   .dl-meta { position: relative; }
   details.log summary {
-    cursor: pointer; color: var(--muted); font-size: 13px; list-style: none;
+    cursor: pointer; color: var(--ink-2); font-size: 13px; list-style: none;
     display: inline-flex; align-items: center; gap: 3px;
     padding: 12px 0; margin: -12px 0; /* 视觉行高不变，触控高度补到 ≥40px */
   }
   details.log summary::-webkit-details-marker { display: none; }
-  details.log summary .chev { transition: transform .25s cubic-bezier(.2, 0, 0, 1); }
+  details.log summary .chev { transition: transform .2s ease; }
   details.log.is-open summary .chev { transform: rotate(180deg); }
   /* 展开/收起：grid 0fr→1fr 过渡 + 淡入，内层 overflow 裁切，长内容自身滚动 */
   .log-anim {
     position: absolute; top: calc(100% + 8px); left: 0; z-index: 5;
     width: max-content; min-width: 240px; max-width: min(320px, calc(100vw - 80px));
     display: grid; grid-template-rows: 0fr; opacity: 0;
-    transition: grid-template-rows .25s cubic-bezier(.2, 0, 0, 1), opacity .15s ease;
+    transition: grid-template-rows .2s ease, opacity .15s ease;
   }
   details.log.is-open .log-anim { grid-template-rows: 1fr; opacity: 1; }
   .log-clip {
     overflow: hidden; min-height: 0;
-    background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
-    box-shadow: var(--shadow-hover);
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    box-shadow: var(--shadow-2);
   }
   .log-body {
-    margin: 6px; padding: 6px 8px; max-height: 148px; overflow: auto;
-    background-color: var(--track); border-radius: 7px;
-    font-size: 12.5px; line-height: 1.6; color: var(--muted);
-    display: grid; gap: 2px; align-content: start;
+    margin: 6px; padding: 8px 10px; max-height: 160px; overflow: auto;
+    background-color: var(--btn2); border-radius: 10px;
+    font-size: 13px; line-height: 1.6; color: var(--ink-2);
+    display: grid; gap: 3px; align-content: start;
     /* 滚动渐隐阴影（Lea Verou 经典配方）：仅在可滚时于边缘提示，静态零 JS */
     background-image:
-      linear-gradient(var(--track) 40%, rgba(0, 0, 0, 0)) top / 100% 14px no-repeat local,
-      linear-gradient(rgba(0, 0, 0, 0), var(--track) 60%) bottom / 100% 14px no-repeat local,
-      radial-gradient(farthest-side at 50% 0, rgba(16, 20, 28, .16), rgba(0, 0, 0, 0)) top / 100% 14px no-repeat scroll,
-      radial-gradient(farthest-side at 50% 100%, rgba(16, 20, 28, .16), rgba(0, 0, 0, 0)) bottom / 100% 14px no-repeat scroll;
+      linear-gradient(var(--btn2) 40%, rgba(0, 0, 0, 0)) top / 100% 14px no-repeat local,
+      linear-gradient(rgba(0, 0, 0, 0), var(--btn2) 60%) bottom / 100% 14px no-repeat local,
+      radial-gradient(farthest-side at 50% 0, var(--fade), rgba(0, 0, 0, 0)) top / 100% 14px no-repeat scroll,
+      radial-gradient(farthest-side at 50% 100%, var(--fade), rgba(0, 0, 0, 0)) bottom / 100% 14px no-repeat scroll;
   }
   /* Releases 式分组：组标题（新增/变更/…）加粗，条目用 lucide 圆点 */
   .log-body .log-head { font-weight: 600; color: var(--ink); margin-top: 4px; }
   .log-body .log-head:first-child { margin-top: 0; }
   .log-body .log-item { display: flex; gap: 7px; }
-  .log-body .log-item .ico { width: 5px; height: 5px; margin-top: .58em; opacity: .7; }
+  .log-body .log-item .ico { width: 5px; height: 5px; margin-top: .58em; color: var(--ink); opacity: .55; }
 
+  /* 主按钮：16px / 圆角 16px / 高 48px（≥44 触达），手机全宽 */
   .btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    min-height: 44px; padding: 0 22px; border-radius: 11px;
-    color: #fff; font-size: 15px; font-weight: 600; text-decoration: none;
+    min-height: 48px; padding: 0 28px; border-radius: 16px;
+    background: var(--primary-deep); color: #fff;
+    font-size: 16px; font-weight: 600; text-decoration: none;
     position: relative; overflow: hidden;
-    transition: background-color .15s ease, transform .1s ease;
+    width: 100%;
+    transition: background-color .16s ease, transform .16s ease;
   }
-  .cal .btn { background: var(--cal-btn); }
-  .cal .btn:hover { background: var(--cal-btn-hover); }
-  .exp .btn { background: var(--exp-btn); }
-  .exp .btn:hover { background: var(--exp-btn-hover); }
+  .btn .ico { width: 18px; height: 18px; }
   .btn:active { transform: scale(.98); }
-  .btn .ico { width: 17px; height: 17px; }
-  /* 空态/禁用按钮：不可点击、不给下载入口 */
-  .btn.is-off {
-    background: var(--track); color: var(--muted);
+  @media (hover: hover) {
+    .btn:not(.is-off):not(.is-loading):hover { background: var(--primary-deep-hover); }
+  }
+  @media (min-width: 768px) { .btn { width: auto; } }
+  /* 空态/禁用按钮：次要态配色，不可点击、不给下载入口 */
+  .btn.is-off, .btn.is-loading {
+    background: var(--btn2); color: var(--btn2-ink);
     pointer-events: none; cursor: default;
   }
   /* 探测期间的骨架态：不闪错误、不可点击 */
-  .btn.is-loading { background: var(--line); color: var(--muted); pointer-events: none; }
   .btn.is-loading::after {
     content: ""; position: absolute; inset: 0;
-    background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, .4) 50%, transparent 70%);
+    background: linear-gradient(100deg, transparent 30%, var(--shimmer) 50%, transparent 70%);
     background-size: 200% 100%;
     animation: shimmer 1.2s linear infinite;
   }
   @keyframes shimmer { to { background-position: -200% 0; } }
 
-  a:focus-visible, .btn:focus-visible { outline: 2px solid var(--cal-ring); outline-offset: 2px; border-radius: 4px; }
+  a:focus-visible, .btn:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--primary); outline-offset: 2px;
+  }
 
-  /* 页脚 */
-  footer { margin-top: auto; border-top: 1px solid var(--line); padding: 20px 0 28px; }
-  footer p { color: var(--muted); font-size: 13px; }
+  /* 页脚：仅版权一行 */
+  footer {
+    margin-top: auto; border-top: 1px solid var(--line);
+    padding-top: 20px;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  }
+  footer p { color: var(--ink-2); font-size: 13px; }
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition: none !important; }
@@ -233,21 +270,32 @@
     .btn.is-loading::after { animation: none; }
   }
 
-  /* 动效统一：入场/抬升/切换一套缓动，单次不超过 400ms */
+  /* 动效统一：入场/抬升/切换 150~200ms ease 为主，单次不超过 400ms */
   @keyframes fade-in-up {
     from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: translateY(0); }
   }
-  .intro { animation: fade-in-up .32s cubic-bezier(.2, 0, 0, 1) backwards; }
-  .cards .card:nth-child(1) { animation: fade-in-up .32s cubic-bezier(.2, 0, 0, 1) .06s backwards; }
-  .cards .card:nth-child(2) { animation: fade-in-up .32s cubic-bezier(.2, 0, 0, 1) .14s backwards; }
+  .intro { animation: fade-in-up .3s cubic-bezier(.2, 0, 0, 1) backwards; }
+  .cards .card:nth-child(1) { animation: fade-in-up .3s cubic-bezier(.2, 0, 0, 1) .06s backwards; }
+  .cards .card:nth-child(2) { animation: fade-in-up .3s cubic-bezier(.2, 0, 0, 1) .14s backwards; }
 </style>
 </head>
 <body>
   <!-- lucide 图标 sprite（ISC 许可，https://lucide.dev/license）：
        notebook-pen / flame / receipt / dot / download / smartphone / check / flask-conical / calendar / chevron-down
-       其中 flame 与 receipt 路径照抄两 App 仓库 ic_launcher_foreground.xml（同为 Lucide 24 视口） -->
-  <svg style="display:none" aria-hidden="true">
+       其中 flame 与 receipt 路径照抄两 App 仓库 ic_launcher_foreground.xml（同为 Lucide 24 视口）；
+       sq-bg = squircle 超椭圆底（|x|⁵+|y|⁵=1，108 视口 8% 留白）叠两 App 启动图标同款竖直蓝渐变。
+       容器用零尺寸定位而非 display:none：渐变等 paint server 不能从 display:none 子树解析 -->
+  <svg style="position:absolute; width:0; height:0; overflow:hidden" aria-hidden="true">
+    <defs>
+      <linearGradient id="app-grad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#4495FF"/>
+        <stop offset="1" stop-color="#2B6DE8"/>
+      </linearGradient>
+      <symbol id="sq-bg" viewBox="0 0 108 108">
+        <path d="M99.36 54C99.36 61.2 99.29 70.87 99.14 75.6C98.99 80.32 98.76 80.44 98.46 82.36C98.15 84.27 97.78 85.69 97.31 87.07C96.85 88.46 96.31 89.61 95.67 90.67C95.04 91.74 94.32 92.66 93.49 93.49C92.66 94.32 91.74 95.04 90.67 95.67C89.61 96.31 88.46 96.85 87.07 97.31C85.69 97.78 84.27 98.15 82.36 98.46C80.44 98.76 80.32 98.99 75.6 99.14C70.87 99.29 61.2 99.36 54 99.36C46.8 99.36 37.13 99.29 32.4 99.14C27.68 98.99 27.56 98.76 25.64 98.46C23.73 98.15 22.31 97.78 20.93 97.31C19.54 96.85 18.39 96.31 17.33 95.67C16.26 95.04 15.34 94.32 14.51 93.49C13.68 92.66 12.96 91.74 12.33 90.67C11.69 89.61 11.15 88.46 10.69 87.07C10.22 85.69 9.85 84.27 9.54 82.36C9.24 80.44 9.01 80.32 8.86 75.6C8.71 70.87 8.64 61.2 8.64 54C8.64 46.8 8.71 37.13 8.86 32.4C9.01 27.68 9.24 27.56 9.54 25.64C9.85 23.73 10.22 22.31 10.69 20.93C11.15 19.54 11.69 18.39 12.33 17.33C12.96 16.26 13.68 15.34 14.51 14.51C15.34 13.68 16.26 12.96 17.33 12.33C18.39 11.69 19.54 11.15 20.93 10.69C22.31 10.22 23.73 9.85 25.64 9.54C27.56 9.24 27.68 9.01 32.4 8.86C37.13 8.71 46.8 8.64 54 8.64C61.2 8.64 70.87 8.71 75.6 8.86C80.32 9.01 80.44 9.24 82.36 9.54C84.27 9.85 85.69 10.22 87.07 10.69C88.46 11.15 89.61 11.69 90.67 12.33C91.74 12.96 92.66 13.68 93.49 14.51C94.32 15.34 95.04 16.26 95.67 17.33C96.31 18.39 96.85 19.54 97.31 20.93C97.78 22.31 98.15 23.73 98.46 25.64C98.76 27.56 98.99 27.68 99.14 32.4C99.29 37.13 99.36 46.8 99.36 54Z" fill="url(#app-grad)"/>
+      </symbol>
+    </defs>
     <symbol id="i-notebook" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/><path d="M2 6h4"/><path d="M2 10h4"/><path d="M2 14h4"/><path d="M2 18h4"/><path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/>
     </symbol>
@@ -303,9 +351,9 @@
     <section class="cards">
       <article class="card cal" data-app="CalorieDiary">
         <div class="card-head">
-          <svg class="app-ico" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <use href="#i-flame"/>
+          <svg class="app-ico" width="64" height="64" viewBox="0 0 108 108" aria-hidden="true">
+            <use href="#sq-bg"/>
+            <use href="#i-flame" x="20.4" y="19" width="67.2" height="67.2"/>
           </svg>
           <div>
             <h2>热量日记</h2>
@@ -349,9 +397,9 @@
 
       <article class="card exp" data-app="ExpenseDiary">
         <div class="card-head">
-          <svg class="app-ico" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <use href="#i-receipt"/>
+          <svg class="app-ico" width="64" height="64" viewBox="0 0 108 108" aria-hidden="true">
+            <use href="#sq-bg"/>
+            <use href="#i-receipt" x="22.8" y="22.8" width="62.4" height="62.4"/>
           </svg>
           <div>
             <h2>开支日记</h2>
