@@ -150,8 +150,9 @@
     min-height: 44px; padding: 0 14px; border: 0; border-radius: 12px;
     background: transparent; color: var(--ink-2);
     font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
-    transition: background-color .16s ease, color .16s ease, box-shadow .16s ease;
+    transition: background-color .16s ease, color .16s ease, box-shadow .16s ease, transform .12s ease;
   }
+  .chan:active { transform: scale(.96); }
   .chan .ico { width: 15px; height: 15px; }
   .chan[aria-checked="true"] {
     background: var(--card); color: var(--ink);
@@ -269,8 +270,8 @@
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition: none !important; }
-    .intro, .card { animation: none !important; }
-    .card:hover { transform: none; }
+    .intro, .card, .ver, .dl-note, details.log { animation: none !important; }
+    .card:hover, .chan:active { transform: none; }
     .btn.is-loading::after { animation: none; }
   }
 
@@ -282,6 +283,11 @@
   .intro { animation: fade-in-up .3s cubic-bezier(.2, 0, 0, 1) backwards; }
   .cards .card:nth-child(1) { animation: fade-in-up .3s cubic-bezier(.2, 0, 0, 1) .06s backwards; }
   .cards .card:nth-child(2) { animation: fade-in-up .3s cubic-bezier(.2, 0, 0, 1) .14s backwards; }
+
+  /* 微交互层：状态行浮现（探测完成/切换时轻换上浮，miuix 式丝滑） */
+  .ver:not([hidden]), .dl-note:not([hidden]), details.log:not([hidden]) {
+    animation: fade-in-up .18s cubic-bezier(.2, 0, 0, 1) backwards;
+  }
 </style>
 </head>
 <body>
@@ -578,11 +584,20 @@
         if (logEl.classList.contains('is-open') && !logEl.contains(e.target)) collapseLog(false);
       });
 
+      var motionOK = !matchMedia('(prefers-reduced-motion: reduce)').matches;
       function pick(ch) {
         if (ch === sel) return;
         sel = ch;
         userPicked = true;
         render();
+        // 通道切换：内容轻换（180ms 上浮淡入，miuix 式），reduced-motion 下静默
+        if (motionOK) {
+          [verEl, updEl, hint, logEl, note].forEach(function (el) {
+            if (!el || el.hidden || !el.animate) return;
+            el.animate([{ opacity: 0, transform: 'translateY(4px)' }, { opacity: 1, transform: 'none' }],
+              { duration: 180, easing: 'cubic-bezier(.2, 0, 0, 1)' });
+          });
+        }
       }
 
       function render() {
