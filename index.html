@@ -175,6 +175,11 @@
   .dl-row .with-ico { display: inline-flex; align-items: center; gap: 5px; }
   .dl-row .ico { width: 13px; height: 13px; }
   .dl-note[hidden], .dl-hint[hidden], .chip[hidden], .dl-row .with-ico[hidden], details.log[hidden] { display: none; }
+  .dl-note .retry-link {
+    color: var(--primary); background: none; border: 0; font: inherit; cursor: pointer;
+    padding: 4px 8px; margin: -4px -8px; border-radius: 10px;
+  }
+  .dl-note .retry-link:hover { background: rgba(52, 130, 255, .12); }
   .chip {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 12.5px; color: var(--ink);
@@ -335,7 +340,6 @@
         <use href="#i-notebook"/>
       </svg>
       <span>日记系列</span>
-      <span class="domain">diary.horatio.cn</span>
     </div>
   </header>
 
@@ -643,6 +647,16 @@
           btn.removeAttribute('href');
           btnLabel.textContent = '暂无版本';
           note.textContent = s.status === 'error' ? '版本信息获取失败，请稍后重试' : '暂无可下载版本';
+          if (s.status === 'error') {
+            // 存储抖动造成的瞬时失败不该粘死：给一个就地重试入口
+            note.appendChild(document.createTextNode(' '));
+            var retry = document.createElement('button');
+            retry.type = 'button';
+            retry.className = 'retry-link';
+            retry.textContent = '重试';
+            retry.addEventListener('click', probeAll);
+            note.appendChild(retry);
+          }
           note.hidden = false;
         }
       }
@@ -689,13 +703,29 @@
         });
       });
 
-      render();
-      Promise.all(ORDER.map(function (ch) {
-        return loadChannel(dir, ch).then(function (res) {
-          st[ch] = res;
-          if (ch === sel) render();
-        });
-      })).then(finish);
+      var probing = false;
+      function probeAll() {
+        if (probing) return;
+        probing = true;
+        ORDER.forEach(function (ch) { st[ch] = { status: 'loading' }; });
+        render();
+        Promise.all(ORDER.map(function (ch) {
+          return loadChannel(dir, ch).then(function (res) {
+            st[ch] = res;
+            if (ch === sel) render();
+          });
+        })).then(finish).then(function () { probing = false; });
+      }
+      // 加载瞬间撞上存储抖动会被冻结成"没有"：回焦/回到前台时自动复探非就绪通道
+      function reprobeIfStale() {
+        var stale = ORDER.some(function (ch) { return st[ch].status !== 'ready'; });
+        if (stale) probeAll();
+      }
+      window.addEventListener('focus', reprobeIfStale);
+      document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'visible') reprobeIfStale();
+      });
+      probeAll();
     });
   })();
   </script>
